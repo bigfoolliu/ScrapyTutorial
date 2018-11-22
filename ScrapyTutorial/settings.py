@@ -11,14 +11,15 @@
 
 BOT_NAME = 'ScrapyTutorial'
 
-SPIDER_MODULES = ['ScrapyTutorial.spiders']
-NEWSPIDER_MODULE = 'ScrapyTutorial.spiders'
+SPIDER_MODULES = ['ScrapyTutorial.spiders']  # Scrapy搜索spider的模块列表
+NEWSPIDER_MODULE = 'ScrapyTutorial.spiders'  # 查找
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'ScrapyTutorial (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False  # 不遵守robots.txt rules
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
