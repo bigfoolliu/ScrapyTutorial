@@ -7,6 +7,8 @@
 import datetime
 import json
 
+from ScrapyTutorial.items import ItcastItem, TencentItem
+
 
 class ScrapytutorialPipeline(object):
     def process_item(self, item, spider):
@@ -33,13 +35,18 @@ class ItcastPipeline(object):
         :param spider:
         :return:
         """
-        item['spider'] = spider.name
-        item['time'] = str(datetime.datetime.now())
+        # TODO: 根据item的类型来告诉引擎将爬虫产生的items传入哪一个管道
+        if isinstance(item, ItcastItem):
+            item['spider'] = spider.name
+            item['time'] = str(datetime.datetime.now())
 
-        item['img'] = 'http://www.itcast.cn/' + dict(item)['img']
+            item['img'] = 'http://www.itcast.cn/' + dict(item)['img']
 
-        json_str = json.dumps(dict(item)) + '\n'
-        self.f.write(json_str)  # 写入json字符串
+            json_str = json.dumps(dict(item)) + '\n'
+            self.f.write(json_str)  # 写入json字符串
+
+        # 注意一定要将item返回,因为不是传到该管道的时候, 需要传入下一个管道
+        return item
 
     def close_spider(self, spider):
         """
@@ -58,8 +65,17 @@ class TencentPipeline(object):
         self.f = open('tencent.json', 'w')
 
     def process_item(self, item, spider):
-        json_str = json.dumps(dict(item)) + '\n'
-        self.f.write(json_str)  # 写入json字符串
+        """
+        处理item容器
+        :param item:
+        :param spider:
+        :return:
+        """
+        if isinstance(item, TencentItem):
+            json_str = json.dumps(dict(item)) + '\n'
+            self.f.write(json_str)  # 写入json字符串
+
+        return item
 
     def close_spider(self, spider):
         self.f.close()
