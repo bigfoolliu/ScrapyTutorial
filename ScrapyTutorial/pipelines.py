@@ -49,3 +49,17 @@ class ItcastPipeline(object):
         """
         self.f.close()
 
+
+class TencentPipeline(object):
+    """
+    scrapy crawl itcast -o data/tencent.json则可以生成文件至指定目录
+    """
+    def open_spider(self, spider):
+        self.f = open('tencent.json', 'w')
+
+    def process_item(self, item, spider):
+        json_str = json.dumps(dict(item)) + '\n'
+        self.f.write(json_str)  # 写入json字符串
+
+    def close_spider(self, spider):
+        self.f.close()
