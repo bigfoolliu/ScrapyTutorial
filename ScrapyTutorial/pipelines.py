@@ -7,7 +7,7 @@
 import datetime
 import json
 
-from ScrapyTutorial.items import ItcastItem, TencentItem
+from ScrapyTutorial.items import ItcastItem, TencentItem, TencentCrawlSpiderItem
 
 
 class ScrapytutorialPipeline(object):
@@ -26,7 +26,7 @@ class ItcastPipeline(object):
         :param spider:
         :return:
         """
-        self.f = open('itcast.json', 'w')
+        self.f = open('data/itcast.json', 'w')
 
     def process_item(self, item, spider):
         """
@@ -62,7 +62,7 @@ class TencentPipeline(object):
     scrapy crawl itcast -o data/tencent.json则可以生成文件至指定目录
     """
     def open_spider(self, spider):
-        self.f = open('tencent.json', 'w')
+        self.f = open('data/tencent.json', 'w')
 
     def process_item(self, item, spider):
         """
@@ -74,6 +74,25 @@ class TencentPipeline(object):
         if isinstance(item, TencentItem):
             json_str = json.dumps(dict(item)) + '\n'
             self.f.write(json_str)  # 写入json字符串
+
+        return item
+
+    def close_spider(self, spider):
+        self.f.close()
+
+
+class TencentCrawlSpiderPipeline(object):
+    """
+    TencentCrawlSpiderSpider的管道
+    """
+
+    def open_spider(self, spider):
+        self.f = open('data/tencent_crawlspider.json', 'w')
+
+    def process_item(self, item, spider):
+        if isinstance(item, TencentCrawlSpiderItem):
+            json_str = json.dumps(dict(item)) + '\n'
+            self.f.write(json_str)
 
         return item
 

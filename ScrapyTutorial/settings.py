@@ -67,8 +67,9 @@ ROBOTSTXT_OBEY = False  # 不遵守robots.txt rules
 # TODO: 为了启用自己写的管道,需要再次配置并启用,后面整型数值越低，组件的优先级越高(0-1000)
 ITEM_PIPELINES = {
     # 'ScrapyTutorial.pipelines.ScrapytutorialPipeline': 300,
+    'ScrapyTutorial.pipelines.ItcastPipeline': 300,
     'ScrapyTutorial.pipelines.TencentPipeline': 400,
-    'ScrapyTutorial.pipelines.ItcastPipeline': 500
+    'ScrapyTutorial.pipelines.TencentCrawlSpiderPipeline': 500
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

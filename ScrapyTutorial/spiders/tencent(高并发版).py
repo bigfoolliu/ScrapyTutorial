@@ -44,6 +44,3 @@ class TencentSpider(scrapy.Spider):
             next_url = "https://hr.tencent.com/" + response.xpath("//a[@id='next']/@href").extract_first()
 
             yield scrapy.Request(next_url, callback=self.parse)
-
-
-

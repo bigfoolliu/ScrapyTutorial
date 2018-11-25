@@ -39,3 +39,12 @@ class TencentItem(scrapy.Item):
     people_number = scrapy.Field()  # 招聘人数
     work_location = scrapy.Field()  # 工作地点
     publish_times = scrapy.Field()  # 发布时间
+
+
+class TencentCrawlSpiderItem(scrapy.Item):
+    """
+    TencentCrawlSpiderSpider的字段容器
+    记录详情页面的字段
+    """
+    position_duty = scrapy.Field()  # 工作职责
+    position_requirement = scrapy.Field()  # 工作要求
