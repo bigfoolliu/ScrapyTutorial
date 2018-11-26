@@ -4,8 +4,11 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
+import random
 
 from scrapy import signals
+from ScrapyTutorial.settings import USER_AGENT_LIST
+from ScrapyTutorial.settings import PROXY_LIST
 
 
 class ScrapytutorialSpiderMiddleware(object):
@@ -101,3 +104,51 @@ class ScrapytutorialDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class RandomUserAgentMiddleware(object):
+    """
+    选用随机User-Agent中间件
+    """
+    def process_request(self, request, spider):
+        """
+        处理request
+        :param request:
+        :param spider:
+        :return:
+        """
+        user_agent = random.choice(USER_AGENT_LIST)
+
+        # 将默认的User-Agent设置为此处随机选取的, 之后每次发送request都会重新设置
+        request.headers['User-Agent'] = user_agent
+
+
+class RandomProxyMiddleware(object):
+    """
+    选用随机代理中间件
+    """
+    def process_request(self, request, spider):
+        """
+        使用代理ip来发送请求
+        :param request:
+        :param spider:
+        :return:
+        """
+        proxy = random.choice(PROXY_LIST)
+
+        # 给当前的请求添加代理信息
+        request.meta['proxy'] = proxy
+
+        """
+        当使用的付费代理时, 需要对用户的密码进行base64加密处理:
+        
+        if proxy['user_passwd'] is None:
+            # 没有代理账户验证的代理使用方式
+            request.meta['proxy'] = "http://" + proxy['ip_port']
+        else:
+            # 对账户密码进行base64编码转换
+            base64_userpasswd = base64.b64encode(proxy['user_passwd'])
+            # 对应到代理服务器的信令格式里
+            request.headers['Proxy-Authorization'] = 'Basic ' + base64_userpasswd
+            request.meta['proxy'] = "http://" + proxy['ip_port']
+        """
