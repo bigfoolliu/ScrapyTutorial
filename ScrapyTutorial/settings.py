@@ -18,7 +18,7 @@ NEWSPIDER_MODULE = 'ScrapyTutorial.spiders'  # 查找
 # USER_AGENT = 'ScrapyTutorial (+http://www.yourdomain.com)'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
 
-# TODO: 使用fake_useragent模块生成的User-Agent列表
+# 使用fake_useragent模块生成的User-Agent列表
 USER_AGENT_LIST = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1664.3 \
     Safari/537.36',
@@ -43,14 +43,14 @@ ROBOTSTXT_OBEY = False  # 不遵守robots.txt rules
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# TODO: 设置下载延迟
-DOWNLOAD_DELAY = 3
+# 设置下载延迟
+DOWNLOAD_DELAY = 2
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-# TODO: 除非特殊需要，禁用cookies，防止某些网站根据Cookie来封锁爬虫.
+# 除非特殊需要，禁用cookies，防止某些网站根据Cookie来封锁爬虫.
 COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
@@ -70,11 +70,11 @@ COOKIES_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-# TODO: 激活下载器中间件组件, 键为中间件类的路径，值为其中间件的顺序(order)
+# 激活下载器中间件组件, 键为中间件类的路径，值为其中间件的顺序(order)
 DOWNLOADER_MIDDLEWARES = {
     'ScrapyTutorial.middlewares.ScrapytutorialDownloaderMiddleware': 543,
-    'ScrapyTutorial.middlewares.RandomUserAgentMiddleware': 544,
-    'ScrapyTutorial.middlewares.RandomProxyMiddleware': 545
+    # 'ScrapyTutorial.middlewares.RandomUserAgentMiddleware': 544,
+    # 'ScrapyTutorial.middlewares.RandomProxyMiddleware': 545
 }
 
 # Enable or disable extensions
@@ -85,7 +85,7 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-# TODO: 为了启用自己写的管道,需要再次配置并启用,后面整型数值越低，组件的优先级越高(0-1000)
+# 为了启用自己写的管道,需要再次配置并启用,后面整型数值越低，组件的优先级越高(0-1000)
 ITEM_PIPELINES = {
     # 'ScrapyTutorial.pipelines.ScrapytutorialPipeline': 300,
     'ScrapyTutorial.pipelines.ItcastPipeline': 300,
@@ -114,7 +114,7 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-# TODO: 西刺代理上选取的代理列表
+# 西刺代理上选取的代理列表
 PROXY_LIST = [
     'https://219.234.5.12:3128',
     'https://101.236.55.145:8866',

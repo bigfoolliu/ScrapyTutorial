@@ -45,6 +45,8 @@ scrapy runspider baidu.py: 执行爬虫
 scrapy crawl baidu: 执行爬虫(推荐,不必需要指定具体的文件)
 
 scrapy crawl baidu -o data/baidu_result.json: 执行爬虫,并将结果保存指定目录下的json格式文件(还默认支持csv、xml、jl等)
+
+scrapy shell "http://www.baidu.com/" -s USER_AGENT="xxx": 以指定的User-Agent访问一个网址返回响应
 ```
 
 **Request对象和Response对象的属性:**
@@ -69,7 +71,7 @@ Response对象的属性:
 从response中提取字符串:
     response.xpath("//title/text()").extract()  # 返回所有结果的字符串列表,没有匹配到则返回空列表
     response.xpath("//title/text()").extract_first()  # 返回第一个匹配到的结果,没有匹配到则返回None
-    
+
 注意: scrapy中嵌入了xpath语法, 但是提取数据需要使用extract()和extract_first()函数!
 ```
 
@@ -81,7 +83,7 @@ Response对象的属性:
 
 ## Item Pipeline
 
-**item pipeline的一些典型应用：**
+**item pipeline的一些典型应用:**
 
 - 验证爬取的数据(检查item包含某些字段，比如说name字段)
 - 查重(并丢弃)
@@ -100,7 +102,7 @@ class TencentPipeline(object):
         可选实现，做参数初始化等
         """
         pass
-    
+
     def process_item(self, item, spider):
         """
         这个方法必须实现，每个item pipeline组件都需要调用该方法，
@@ -109,13 +111,13 @@ class TencentPipeline(object):
         if isinstance(item, TencentItem):
             pass
         return item
-     
+
     def open_spider(self, spider):
         """
         可选实现，当spider被开启时，这个方法被调用。
         """
         pass
-    
+
     def close_spider(self, spider):
         """
         可选实现，当spider被关闭时，这个方法被调用
@@ -159,7 +161,7 @@ class TencentSpider(scrapy.Spider):
     name = 'tencent'
     allowed_domains = ['hr.tencent.com']
     start_urls = 'https://hr.tencent.com/position.php?&start=0'
-        
+
     def parse(self, response):
         """
         必须要有
@@ -190,9 +192,9 @@ scrapy genspider -t crawl baidu baidu.com
 class scrapy.spiders.Rule(
         link_extractor,  # 一个Link Extractor对象，用于定义需要提取的链接
         callback = None,  # 从link_extractor中每获取到链接时，参数所指定的值作为回调函数，该回调函数接受一个response作为其第一个参数
-        cb_kwargs = None, 
+        cb_kwargs = None,
         follow = None,  # True表示跟进从response中提取到的链接, False表示不跟进
-        process_links = None, 
+        process_links = None,
         process_request = None
 )
 ```
@@ -220,7 +222,7 @@ class scrapy.linkextractors.LinkExtractor(
 )
 ```
 
-**小工具: fake_useragent**
+**小工具: fake_useragent:**
 
 ```python
 """
@@ -265,7 +267,7 @@ yield scrapy.FormRequest(url, formdata, callback)
     VPN/VPS(翻墙);
     Tor网络(暗网), 洋葱浏览器
     ```
-   
+
 6. 使用Crawlera(专用于爬虫的代理组件, 但是需要花钱在维护scrapy的公司购买)
 
 ## 设置下载中间件
@@ -287,13 +289,13 @@ process_request(self, request, spider):
         4. raise IgnoreRequest       安装的下载中间件的raise_exception()方法将被调用,
                                         否则Request.errback方法将会被调用,
                                         否则该异常将会被忽略且不记录.
-                                        
+
 process_response(self, response, spider):
     下载器完成http请求发响应给引擎时调用.
     必须返回下面之一:
-        1. Response对象(与传入的相同或全新的)   由中间件链中的其他process_response处理     
+        1. Response对象(与传入的相同或全新的)   由中间件链中的其他process_response处理
         2. Request对象                        中间价链停止,返回的request被重新调度
-        3. raise IgnoreRequest               同process_request的.              
+        3. raise IgnoreRequest               同process_request()中的raise IgnoreRequest
 ```
 
 ## Scrapyd远程部署和监控爬虫
@@ -329,4 +331,76 @@ process_response(self, response, spider):
 ## scrapy-redis分布式爬虫组件
 
 基于scrapy(不能独立运行), 将scrapy的队列换成redis数据库, 多个爬虫端都可以访问redis数据库. 
+支持断点续爬(暂停后继续之前的请求爬取).
 
+自带四种组件(即对scrapy原有进行更改):
+
+1. Scheduler(调度器, 入列和出列)
+2. Duplication Filter(去重, 不操作重复的request)
+3. Item Pipeline(将item存入redis的items queue)
+4. Base Spider(不使用原有Spider类, 改用RedisSpider)
+
+在redis数据库里提供:
+
+1. 请求指纹集合(同一个数据库里判重, 不重复的请求放到请求队列)
+2. 请求队列(同一个数据库放置请求, 以供分布式爬取, 主服务器爬第一个网址, 其他从服务器依次从队列里选取请求)
+3. item队列(同一个数据库保存所有的结果)
+
+**编写scrapy-redis分布式爬虫的步骤:**
+
+1. 现将代码写成scrapy版本
+2. 修改settings.py文件的配置
+3. 修改spider文件
+
+    - 导入并继承RedisSpider, RedisCrawlSpider
+    - 删除start_urls, 避免多个爬虫端发送重复请求
+    - 添加redis_key, 表示数据库接收第一批url的键
+
+4. 启动爬虫, 数据库通过lpush添加第一批请求url地址
+5. 从端中连接主服务器的redis数据库并启动爬虫, 实现分布式
+
+    ```text
+    $redis-cli -h 192.168.37.65  # 从机连接主机redis,从机甚至不需要安装redis
+    ```
+
+**配置:**
+
+```python
+"""
+在settings.py文件中做出配置
+可以做些小修改直接使用
+"""
+# 1(必须). 使用了scrapy_redis的去重组件，在redis数据库里做去重
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+
+# 2(必须). 使用了scrapy_redis的调度器，在redis里分配请求
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+
+# 3(必须). 在redis中保持scrapy-redis用到的各个队列，从而允许暂停和暂停后恢复，也就是不清理redis queues
+SCHEDULER_PERSIST = True
+
+# 4(必须). 通过配置RedisPipeline将item写入key为 spider.name : items 的redis的list中，供后面的分布式处理item
+# 这个已经由 scrapy-redis 实现，不需要我们写代码，直接使用即可
+ITEM_PIPELINES = {
+    'scrapy_redis.pipelines.RedisPipeline': 100
+}
+
+# 5(必须). 指定redis数据库的连接参数
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+
+# 6.如果不启用则按scrapy默认的策略
+#  -1. 默认的 按优先级排序(Scrapy默认)
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.SpiderPriorityQueue'
+#  -2. 可选的 按先进先出排序（FIFO）
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.SpiderQueue'
+#  -3. 可选的 按后进先出排序（LIFO）
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.SpiderStack'
+
+# 7. LOG等级
+#LOG_LEVEL = 'DEBUG'
+```
+
+## 自定义爬虫框架
+
+可以自己增加修改功能, 使用已有的框架需要熟读源码, 且修改源码可能带来不可预料的错误.
